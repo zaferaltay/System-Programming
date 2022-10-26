@@ -1,0 +1,74 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+
+
+\title{System Programming Midterm}
+\author{Zafer ALTAY 161044063 }
+\date{May 2021}
+\begin{document}
+
+\maketitle
+
+\section{Problems and Solutions}
+First of all, I created a shared memory for my code, it contains unnamed semaphores and arrays that I will use in some operations.I have created 8 semaphores and I explain their name and what they do:
+
+nurseMutex: While 1 nurse is working, it makes others wait.
+
+vaccinatorsMutex:While 1 vaccinator is working, it makes others wait.
+
+
+empty and full: It synchronizes the processes according to whether the buffer is full and empty.
+
+bufferAccess: If there is a process dealing with Buffer, it prevents others from accessing it.
+
+denem: It activates the vacinator after all processes have been created, that is, to prevent it from working before a citizen is formed.
+
+
+I explain how I produce solutions to the problems I encounter:
+When I run the processes right after fork, it could be that the vacinators wanted to start working before the citizens were formed but to employ the non created.To solve this, I unlocked the semaphore by using the denem semaphore if the number of processes created is equal to the number of people we receive in the inputs.In this case, I made the exceeders start working by sending a sigusr1 signal to their pid.I keep the pids in an array in shared memory. I saved them while creating the process.
+
+
+
+In the nurse process, I first reduced the empty semaphore because we will add the staff we are reading.Then I locked the nurseMutex so that one nurse could work at that time.Then I locked the bufferAccess mutex because only one action should be active in the buffer.Then I read an element from the file and saved it to the buffer. In order not to lose the file offset, I saved an integer value that I increased every time I read in shared memory.Thus, other processes reached the offset of the file.After doing these I unlocked all mutexes and increased the full semaphore by one.This process runs in an infinite loop, if a nurse has reached the index number of the last element in the file, it will exit the loop and close itself. All nurses will close when they see this number is over.
+
+
+The Vacinator is initially waiting for a signal and starts working when it receives this signal.It reduces the full semaphore as it will remove the vaccine from the buffer.Then it locks the vacinatormutex because I want a one vacinator to vaccinate at the same time.Then I lock the buffermutex because after getting vaccinated from the buffer, other processes that I will shifting in the buffer should not access it to avoid being affected.It chooses the citizen who needs to be vaccinated according to his age and calls him to get the vaccine.It does this based on the pids I keep in shared memory.It sends a signal to the citizen he wants to call. Then it continues after receiving the signal from the citizen and unlock the mutexes.
+
+
+The citizen starts working after receiving the signal. Since it has the vaccine, we save the vaccine in the shared memory and increase the dose, so that the oldest one does not work continuously, we give priority to the one who does not receive enough dose yet.If the citizen has received the sufficient dose, he / she leaves the hospital and is released. If the last citizen leaves the hospital, he sends a signal to other processes and closes the program.I do the control of the remaining citizen by reducing the total number of citizens I keep in shared memory.
+
+A quick flow summary:
+    The nurse brings and puts the vaccine in turn until the buffer is full.If the buffer fills up, it is blocked and waits for space to be opened If all the vaccinations have arrived, it will be closed.
+    
+    The vaccinee chooses an ordinary vaccine, if the vaccine he chooses is vaccine1, it sends a signal to work for the oldest citizen or younger citizen with the missing dose. Whichever citizen is the most suitable will have that vaccine.If the vaccine is vaccine2, it choose citizen that had vaccine1 but not vaccine2and vaccinating the most appropriate one as before.The citizen who has both vaccines increases the dose that themselves got in shared memory.When a sufficient dose is taken, it goes out.The hospital closes when all citizens leave.
+
+
+
+
+
+\section{Pass File}
+
+In general, I cite the expectations and shortcomings for convenience:
+
+I called the citizens by checking the age as expected in the homework.If there is a young person taking less dose than the elderly citizen, I will adjust the dose to give him/her priority.
+
+I created and used as many processes as stated.
+
+I adjusted the buffer settings to prevent overflowing without overflowing.
+
+I checked it with Wall and ran it smoothly.
+
+I checked for leaks using Valgrind and there is no leak.
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

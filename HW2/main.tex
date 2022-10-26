@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+
+
+\title{System Programming HW2}
+\author{Zafer ALTAY 161044063 }
+\date{April 2021}
+
+\begin{document}
+
+\maketitle
+
+\section{Problems and Solutions}
+First, I specified a file descriptor to the file given on the command line.Because of my program runs for 8 elements, I runned 8 forks.
+I stored the pid of every child formed in the global array.Before the parent process, I stopped the children with sigsuspend so that the child processes would not start running.Then I sent a signal to all children with the mother process to start trading by sending a sigusr1 signal.
+
+In child processes, I read the file with read and put it in a buffer.I took the line with i.process in the buffer, parsed it and sent it to the lagrange function.While parsing, I converted the numbers between commas to double. I have put the odd columns as x and even column as y into different arrays.(x,y,x,y,x,y).I converted the value returned from the Lagrange function into a string by combining the x and y arrays with the array accordingly.Then I added the newly created string to the file instead of the i.line of the buffer. Since the write () function caused a problem, I wrote the buffer I added completely to the file.I locked the file while I was working on the file so that each process reads and write the file correctly.(I quoted the Lagrange function from Geeksforgeeks.)
+
+
+\section{Pass File}
+
+In general, I cite the expectations and shortcomings for convenience:
+
+First of all, I created the processes.
+
+I locked the file using file lock.
+
+I did parent and child interaction using sigusr and sigsuspend.
+
+
+I've completed the Wall Valgrid checks.
+
+
+In case of any errors, I have printed the information with stderr.
+
+
+The missing part is the calculation of the average and the coefficient after all the processes are finished.
+
+The signal I had to use after all the processes were finished broke my syncronization. So I had to remove it.Therefore, I used waitpidd to block zombies and orphan,while the program is ending. 
+
+
+As I did while reading, the part of parsing and averaging remained incomplete because of this.
+
+
+
+
+
+
+
+
+
+
+\end{document}
